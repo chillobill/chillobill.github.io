@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz with Real-Time Score Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .choices {
+            margin-bottom: 10px;
+        }
+        .feedback {
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .correct {
+            color: green;
+        }
+        .wrong {
+            color: red;
+        }
+        #score {
+            font-size: 1.2em;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Multiple Choice Quiz</h1>
+    <div id="quiz-container"></div>
+    <div id="score">Score: 0</div>
+
+    <script>
+        const quiz = [
+    {
+        question: "What creates a hypertonic environment outside the cells, leading to cellular dehydration?",
+        choices: ["a) High glucose concentration", "b) High sodium ion concentration", "c) Low protein levels", "d) Increased bicarbonate levels"],
+        answer: "b) High sodium ion concentration"
+    },
+    {
+        question: "How do the kidneys maintain blood pH?",
+        choices: ["a) By secreting potassium ions", "b) By reabsorbing hydrogen ions", "c) By excreting hydrogen ions and reabsorbing bicarbonate ions", "d) By producing urea"],
+        answer: "c) By excreting hydrogen ions and reabsorbing bicarbonate ions"
+    },
+    {
+        question: "Which of the following is a top symptom of acute kidney injury (AKI)?",
+        choices: ["a) Increased appetite", "b) Decreased urine output", "c) Weight loss", "d) High blood pressure"],
+        answer: "b) Decreased urine output"
+    },
+    {
+        question: "What is the primary cause of pre-renal AKI?",
+        choices: ["a) Immune complex deposition in the kidneys", "b) Reduced renal perfusion due to hypovolemia", "c) Obstruction of the urinary tract", "d) Intrinsic glomerular damage"],
+        answer: "b) Reduced renal perfusion due to hypovolemia"
+    },
+    {
+        question: "Intra-renal AKI primarily involves damage to which part of the kidney?",
+        choices: ["a) Ureters", "b) Bladder", "c) Kidney tissue (e.g., glomeruli, tubules)", "d) Renal artery"],
+        answer: "c) Kidney tissue (e.g., glomeruli, tubules)"
+    },
+    {
+        question: "What is the cause of post-renal AKI?",
+        choices: ["a) High blood pressure", "b) Urinary tract obstruction", "c) Reduced renal perfusion", "d) Tubular necrosis"],
+        answer: "b) Urinary tract obstruction"
+    },
+    {
+        question: "How do NSAIDs like ibuprofen contribute to intra-renal AKI?",
+        choices: ["a) They increase blood flow to the kidneys.", "b) They inhibit prostaglandin synthesis, reducing renal perfusion.", "c) They cause direct tubular toxicity.", "d) They promote immune-mediated glomerulonephritis."],
+        answer: "b) They inhibit prostaglandin synthesis, reducing renal perfusion."
+    },
+    {
+        question: "Which drug class, when combined with NSAIDs, significantly increases the risk of intra-renal AKI?",
+        choices: ["a) Beta-blockers", "b) ACE inhibitors", "c) Statins", "d) Calcium channel blockers"],
+        answer: "b) ACE inhibitors"
+    },
+    {
+        question: "Which of the following is a key factor in AKI reversibility?",
+        choices: ["a) Delayed intervention", "b) Severity and duration of AKI", "c) Use of diuretics", "d) Patient’s dietary intake"],
+        answer: "b) Severity and duration of AKI"
+    },
+    {
+        question: "Why is it important to adjust morphine doses in AKI patients?",
+        choices: ["a) To prevent hyperglycemia", "b) To avoid excessive sedation and respiratory depression", "c) To reduce pain more effectively", "d) To prevent hypotension"],
+        answer: "b) To avoid excessive sedation and respiratory depression"
+    },
+    {
+        question: "How does morphine induce analgesia?",
+        choices: ["a) By enhancing glutamate release", "b) By activating voltage-gated sodium channels", "c) By inhibiting adenylate cyclase, decreasing cAMP levels", "d) By increasing calcium influx into neurons"],
+        answer: "c) By inhibiting adenylate cyclase, decreasing cAMP levels"
+    },
+    {
+        question: "What is the primary pathophysiological mechanism behind CKD progression?",
+        choices: ["a) Increased aldosterone production", "b) Persistent glomerular hypertension and hyperfiltration", "c) Acute renal inflammation", "d) Decreased blood pressure"],
+        answer: "b) Persistent glomerular hypertension and hyperfiltration"
+    },
+    {
+        question: "Which complication of CKD is directly related to reduced erythropoietin production?",
+        choices: ["a) Hyperkalemia", "b) Anaemia", "c) Hypercalcemia", "d) Hypertension"],
+        answer: "b) Anaemia"
+    },
+    {
+        question: "Why are loop diuretics preferred over thiazide diuretics in advanced CKD?",
+        choices: ["a) They have a longer half-life.", "b) They increase calcium reabsorption.", "c) They are effective at lower GFRs.", "d) They reduce metabolic acidosis."],
+        answer: "c) They are effective at lower GFRs."
+    },
+    {
+        question: "What is the most concerning symptom if a CKD patient has prolonged anticholinergic effects from atropine?",
+        choices: ["a) Dry mouth", "b) Tachycardia", "c) Blurred vision", "d) Decreased urine output"],
+        answer: "d) Decreased urine output"
+    },
+    {
+        question: "What is the most common cause of primary adrenal insufficiency (Addison’s disease)?",
+        choices: ["a) Long-term corticosteroid therapy", "b) Autoimmune destruction of the adrenal cortex", "c) Pituitary adenoma", "d) Congenital adrenal hyperplasia"],
+        answer: "b) Autoimmune destruction of the adrenal cortex"
+    },
+    {
+        question: "Which hormone is in excess in Cushing’s syndrome?",
+        choices: ["a) Aldosterone", "b) Cortisol", "c) Epinephrine", "d) Testosterone"],
+        answer: "b) Cortisol"
+    },
+    {
+        question: "Which intervention is most appropriate for managing an adrenal crisis?",
+        choices: ["a) Oral prednisone", "b) IV hydrocortisone", "c) IV spironolactone", "d) Oral fludrocortisone"],
+        answer: "b) IV hydrocortisone"
+    },
+    {
+        question: "How does hydrocortisone restore vascular tone during an adrenal crisis?",
+        choices: ["a) By increasing nitric oxide synthesis", "b) By enhancing catecholamine effects on adrenergic receptors", "c) By reducing blood pressure", "d) By promoting gluconeogenesis"],
+        answer: "b) By enhancing catecholamine effects on adrenergic receptors"
+    },
+    {
+        question: "Why does hydrocortisone suppress inflammation during an adrenal crisis?",
+        choices: ["a) By inhibiting prostaglandin synthesis via cyclooxygenase inhibition", "b) By reducing cytokine production and blocking phospholipase A2", "c) By upregulating nitric oxide production", "d) By increasing histamine release"],
+        answer: "b) By reducing cytokine production and blocking phospholipase A2"
+    },
+    {
+        question: "What is the primary cause of primary (essential) hypertension?",
+        choices: ["a) Hormonal disorders", "b) Kidney disease", "c) No specific identifiable cause", "d) Certain medications"],
+        answer: "c) No specific identifiable cause"
+    },
+    {
+        question: "How do ACE inhibitors lower blood pressure?",
+        choices: ["a) By blocking beta-adrenergic receptors", "b) By inhibiting the conversion of angiotensin I to angiotensin II", "c) By promoting sodium retention in the kidneys", "d) By increasing aldosterone production"],
+        answer: "b) By inhibiting the conversion of angiotensin I to angiotensin II"
+    },
+    {
+        question: "What is a common side effect of ACE inhibitors due to increased bradykinin levels?",
+        choices: ["a) Dry cough", "b) Hypokalemia", "c) Constipation", "d) Hypercalcemia"],
+        answer: "a) Dry cough"
+    },
+    {
+        question: "How do ACE inhibitors reduce proteinuria?",
+        choices: ["a) By dilating the afferent arteriole", "b) By increasing intraglomerular pressure", "c) By dilating the efferent arteriole", "d) By reducing renal perfusion"],
+        answer: "c) By dilating the efferent arteriole"
+    },
+    {
+        question: "What is the primary site of action for ARBs in reducing blood pressure?",
+        choices: ["a) The liver", "b) The kidneys and blood vessels", "c) The heart", "d) The adrenal glands"],
+        answer: "b) The kidneys and blood vessels"
+    },
+    {
+        question: "Which side effect is commonly associated with ARBs, especially in patients with renal impairment?",
+        choices: ["a) Hypokalemia", "b) Hyperkalemia", "c) Hyponatremia", "d) Hypercalcemia"],
+        answer: "b) Hyperkalemia"
+    },
+    {
+        question: "How do calcium channel blockers (CCBs) lower blood pressure?",
+        choices: ["a) By inhibiting sodium reabsorption in the kidneys", "b) By blocking calcium entry into vascular smooth muscle cells", "c) By promoting vasoconstriction", "d) By reducing the production of aldosterone"],
+        answer: "b) By blocking calcium entry into vascular smooth muscle cells"
+    },
+    {
+        question: "Which of the following is a direct effect of calcium channel blockers on the heart?",
+        choices: ["a) Increased heart rate", "b) Reduced myocardial contractility", "c) Enhanced atrioventricular conduction", "d) Increased cardiac output"],
+        answer: "b) Reduced myocardial contractility"
+    },
+    {
+        question: "How do dihydropyridine CCBs primarily act to lower blood pressure?",
+        choices: ["a) By reducing the heart rate", "b) By causing vasodilation of peripheral arteries", "c) By increasing calcium influx in the myocardium", "d) By reducing aldosterone production"],
+        answer: "b) By causing vasodilation of peripheral arteries"
+    },
+    {
+        question: "Thiazide-like diuretics lower blood pressure by:",
+        choices: ["a) Increasing sodium and water reabsorption", "b) Inhibiting sodium reabsorption in the distal convoluted tubule", "c) Blocking potassium reabsorption in the loop of Henle", "d) Reducing renin release"],
+        answer: "b) Inhibiting sodium reabsorption in the distal convoluted tubule"
+    },
+    {
+        question: "Beta-blockers lower blood pressure by:",
+        choices: ["a) Blocking beta-adrenergic receptors, reducing heart rate and contractility", "b) Promoting vasoconstriction", "c) Increasing renin release from the kidneys", "d) Enhancing sympathetic nervous system activity"],
+        answer: "a) Blocking beta-adrenergic receptors, reducing heart rate and contractility"
+    },
+    {
+        question: "What is the primary feature of heart failure with preserved ejection fraction (HFpEF)?",
+        choices: ["a) Ejection fraction below 40%", "b) Stiff ventricles with impaired filling during diastole", "c) Increased cardiac output", "d) Increased ventricular contractility"],
+        answer: "b) Stiff ventricles with impaired filling during diastole"
+    },
+    {
+        question: "Which hemodynamic change is least likely to occur in decompensated left-sided heart failure?",
+        choices: ["a) Increased pulmonary capillary wedge pressure", "b) Increased systemic vascular resistance", "c) Decreased cardiac output", "d) Decreased right atrial pressure"],
+        answer: "d) Decreased right atrial pressure"
+    },
+    {
+        question: "Which neurohormonal response contributes most to the progression of heart failure with reduced ejection fraction (HFrEF)?",
+        choices: ["a) Increased secretion of atrial natriuretic peptide", "b) Activation of the sympathetic nervous system", "c) Suppression of the renin-angiotensin-aldosterone system", "d) Enhanced parasympathetic tone"],
+        answer: "b) Activation of the sympathetic nervous system"
+    },
+    {
+        question: "Which diuretic class is preferred for rapid relief of congestive symptoms in HFrEF?",
+        choices: ["a) Thiazide diuretics", "b) Loop diuretics", "c) Potassium-sparing diuretics", "d) Osmotic diuretics"],
+        answer: "b) Loop diuretics"
+    },
+    {
+        question: "Which transporter is inhibited by furosemide in the nephron?",
+        choices: ["a) Sodium-chloride symporter in the distal convoluted tubule", "b) Sodium-potassium-chloride cotransporter in the loop of Henle", "c) Sodium-hydrogen exchanger in the proximal tubule", "d) Sodium-potassium ATPase in the collecting duct"],
+        answer: "b) Sodium-potassium-chloride cotransporter in the loop of Henle"
+    },
+    {
+        question: "What is the first step in managing acute heart failure pre-hospital?",
+        choices: ["a) Start IV fluids aggressively", "b) Lay the patient flat", "c) Sit the patient fully upright", "d) Administer oxygen without target saturation levels"],
+        answer: "c) Sit the patient fully upright"
+    },
+    {
+        question: "What is a common side effect of quad therapy in heart failure management?",
+        choices: ["a) Hyperkalemia", "b) Tachycardia", "c) Hypercalcemia", "d) Hypoglycemia"],
+        answer: "a) Hyperkalemia"
+    },
+    {
+        question: "How does sacubitril/valsartan work in heart failure?",
+        choices: ["a) By reducing aldosterone production and sodium reabsorption", "b) By blocking angiotensin II action and inhibiting natriuretic peptide breakdown", "c) By enhancing aldosterone synthesis", "d) By reducing cardiac output"],
+        answer: "b) By blocking angiotensin II action and inhibiting natriuretic peptide breakdown"
+    },
+    {
+        question: "Why should GTN be avoided in acute heart failure with low systolic blood pressure (<110 mmHg)?",
+        choices: ["a) It increases pulmonary edema", "b) It can exacerbate hypotension", "c) It causes bradycardia", "d) It worsens oxygen saturation"],
+        answer: "b) It can exacerbate hypotension"
+    },
+    {
+        question: "What is the most likely diagnosis for a Type 2 diabetic patient with severe hyperglycemia, dehydration, and altered mental status?",
+        choices: ["a) Diabetic ketoacidosis (DKA)", "b) Hypoglycemia", "c) Hyperosmolar Hyperglycemic State (HHS)", "d) Lactic acidosis"],
+        answer: "c) Hyperosmolar Hyperglycemic State (HHS)"
+    },
+    {
+        question: "What is the primary goal of fluid resuscitation in HHS?",
+        choices: ["a) Rapid reduction of blood glucose", "b) Preventing ketone production", "c) Restoring intravascular volume and correcting dehydration", "d) Increasing insulin sensitivity"],
+        answer: "c) Restoring intravascular volume and correcting dehydration"
+    },
+    {
+        question: "What is the primary mechanism of action of metformin?",
+        choices: ["a) Increase insulin secretion", "b) Decrease hepatic glucose production", "c) Block carbohydrate absorption in the intestines", "d) Stimulate glucose uptake in muscles"],
+        answer: "b) Decrease hepatic glucose production"
+    },
+    {
+        question: "Why is metformin contraindicated in patients with impaired kidney function?",
+        choices: ["a) Risk of lactic acidosis", "b) Increased insulin resistance", "c) Risk of hypoglycemia", "d) Liver toxicity"],
+        answer: "a) Risk of lactic acidosis"
+    },
+    {
+        question: "SGLT2 inhibitors lower blood glucose by:",
+        choices: ["a) Increasing insulin secretion", "b) Promoting renal glucose excretion", "c) Inhibiting carbohydrate digestion", "d) Increasing insulin sensitivity"],
+        answer: "b) Promoting renal glucose excretion"
+    },
+    {
+        question: "Which is NOT a common SGLT2 inhibitor?",
+        choices: ["a) Dapagliflozin", "b) Canagliflozin", "c) Sitagliptin", "d) Empagliflozin"],
+        answer: "c) Sitagliptin"
+    },
+    {
+        question: "Glucagon raises blood glucose primarily by:",
+        choices: ["a) Stimulating gluconeogenesis in the liver", "b) Enhancing glucose uptake by muscles", "c) Inhibiting carbohydrate digestion", "d) Promoting glycogen storage in the liver"],
+        answer: "a) Stimulating gluconeogenesis in the liver"
+    },
+    {
+        question: "How do sulfonylureas, like gliclazide, work in managing Type 2 diabetes?",
+        choices: ["a) Inhibit glucose absorption in the intestine", "b) Stimulate insulin secretion from pancreatic beta cells", "c) Enhance glucose uptake in muscles", "d) Inhibit hepatic gluconeogenesis"],
+        answer: "b) Stimulate insulin secretion from pancreatic beta cells"
+    },
+    {
+        question: "What is a potential risk of sulfonylurea use?",
+        choices: ["a) Hyperglycemia", "b) Hypoglycemia", "c) Lactic acidosis", "d) Ketoacidosis"],
+        answer: "b) Hypoglycemia"
+    },
+    {
+        question: "What is the most likely diagnosis for a Type 1 diabetic patient with Kussmaul respirations, fruity breath, and elevated blood glucose?",
+        choices: ["a) Diabetic ketoacidosis (DKA)", "b) Hyperosmolar Hyperglycemic State (HHS)", "c) Hypoglycemia", "d) Lactic acidosis"],
+        answer: "a) Diabetic ketoacidosis (DKA)"
+    },
+    {
+        question: "In DKA, what triggers ketone production?",
+        choices: ["a) Excess insulin secretion", "b) Fatty acid breakdown due to insulin deficiency", "c) High carbohydrate intake", "d) Increased renal glucose excretion"],
+        answer: "b) Fatty acid breakdown due to insulin deficiency"
+    },
+    {
+        question: "What is a hallmark symptom of hypoglycemia in diabetic patients?",
+        choices: ["a) Increased urination", "b) Weight loss", "c) Confusion and fatigue", "d) Elevated blood glucose"],
+        answer: "c) Confusion and fatigue"
+    },
+    {
+        question: "What is the primary mechanism of action of insulin aspart?",
+        choices: ["a) Long-term blood sugar control", "b) Rapid glucose uptake by cells post-meal", "c) Inhibition of hepatic gluconeogenesis", "d) Decreased carbohydrate absorption"],
+        answer: "b) Rapid glucose uptake by cells post-meal"
+    },
+    {
+        question: "What is a key feature of hypoglycemia unawareness?",
+        choices: ["a) Increased sensitivity to insulin", "b) Loss of typical warning symptoms of low blood glucose", "c) Persistent hyperglycemia", "d) Increased glycogen storage"],
+        answer: "b) Loss of typical warning symptoms of low blood glucose"
+    },
+    {
+        question: "Why might SGLT2 inhibitors increase the risk of DKA in Type 1 diabetic patients?",
+        choices: ["a) They increase insulin sensitivity", "b) They reduce insulin requirements and promote fat metabolism", "c) They stimulate carbohydrate digestion", "d) They inhibit ketone production"],
+        answer: "b) They reduce insulin requirements and promote fat metabolism"
+    },
+    {
+        question: "How do corticosteroids like prednisolone affect blood glucose levels?",
+        choices: ["a) Promote gluconeogenesis and reduce glucose uptake", "b) Decrease insulin resistance", "c) Stimulate insulin secretion", "d) Inhibit hepatic glucose production"],
+        answer: "a) Promote gluconeogenesis and reduce glucose uptake"
+    },
+    {
+        question: "What adjustment is commonly needed for insulin when corticosteroids are prescribed?",
+        choices: ["a) Decrease insulin dosage", "b) Increase insulin dosage", "c) Switch to oral hypoglycemics", "d) Avoid using insulin altogether"],
+        answer: "b) Increase insulin dosage"
+    },
+    {
+        question: "Which medication is commonly used to manage diabetic neuropathy?",
+        choices: ["a) Gabapentin", "b) Metformin", "c) Exenatide", "d) Sitagliptin"],
+        answer: "a) Gabapentin"
+    },
+    {
+        question: "What is the primary safety concern with rapid fluid administration in DKA?",
+        choices: ["a) Risk of hypoglycemia", "b) Risk of pulmonary edema or cerebral edema", "c) Increased ketone production", "d) Reduced potassium levels"],
+        answer: "b) Risk of pulmonary edema or cerebral edema"
+    },
+    {
+        question: "Why is metformin effective for managing Type 2 diabetes?",
+        choices: ["a) It increases insulin production.", "b) It reduces hepatic glucose production and enhances insulin sensitivity.", "c) It blocks carbohydrate absorption.", "d) It promotes glucose excretion in urine."],
+        answer: "b) It reduces hepatic glucose production and enhances insulin sensitivity."
+    },
+    {
+        question: "What is the primary pathophysiological mechanism of Acute Respiratory Distress Syndrome (ARDS)?",
+        choices: ["a) Airway obstruction due to mucus buildup", "b) Inflammation and increased alveolar-capillary permeability", "c) Excessive surfactant production", "d) Bronchial hyperresponsiveness"],
+        answer: "b) Inflammation and increased alveolar-capillary permeability"
+    },
+    {
+        question: "How does ARDS affect the FiO₂, PaO₂, and V/Q ratio?",
+        choices: ["a) Improves oxygenation and ventilation-perfusion matching", "b) Causes hypoxemia and decreases the V/Q ratio", "c) Increases ventilation but reduces oxygen diffusion", "d) Enhances oxygen binding to hemoglobin"],
+        answer: "b) Causes hypoxemia and decreases the V/Q ratio"
+    },
+    {
+        question: "What is the role of corticosteroids in ARDS management?",
+        choices: ["a) Promote fluid retention", "b) Enhance surfactant production", "c) Reduce inflammation and stabilize membranes", "d) Increase vascular permeability"],
+        answer: "c) Reduce inflammation and stabilize membranes"
+    },
+    {
+        question: "What is the mechanism of action of ipratropium bromide in asthma management?",
+        choices: ["a) Beta-2 adrenergic receptor agonist", "b) Anticholinergic that reduces bronchoconstriction", "c) Enhances histamine release", "d) Suppresses immune cell activity"],
+        answer: "b) Anticholinergic that reduces bronchoconstriction"
+    },
+    {
+        question: "What is the primary difference between salmeterol and salbutamol?",
+        choices: ["a) Salmeterol acts as a short-acting beta agonist", "b) Salmeterol has a longer duration of action due to lipophilic side chains", "c) Salbutamol is used for maintenance therapy", "d) Salmeterol has a rapid onset for acute relief"],
+        answer: "b) Salmeterol has a longer duration of action due to lipophilic side chains"
+    },
+    {
+        question: "In Type 1 respiratory failure, PaO₂ levels are:",
+        choices: ["a) Normal", "b) Increased", "c) Decreased", "d) Unchanged"],
+        answer: "c) Decreased"
+    },
+    {
+        question: "Which condition is a primary cause of Type 2 respiratory failure?",
+        choices: ["a) Pulmonary embolism", "b) COPD", "c) Pneumonia", "d) ARDS"],
+        answer: "b) COPD"
+    },
+    {
+        question: "How does magnesium sulfate help in asthma exacerbations?",
+        choices: ["a) Blocks calcium influx in airway smooth muscle", "b) Increases mast cell degranulation", "c) Reduces acetylcholine activity at neuromuscular junctions", "d) Suppresses ATP synthesis"],
+        answer: "a) Blocks calcium influx in airway smooth muscle"
+    },
+    {
+        question: "What is the mechanism of action of adrenaline in asthma management?",
+        choices: ["a) Blocks histamine receptors", "b) Beta-2 receptor agonist causing bronchodilation", "c) Suppresses inflammatory cytokines", "d) Blocks acetylcholine receptors"],
+        answer: "b) Beta-2 receptor agonist causing bronchodilation"
+    },
+    {
+        question: "What is the primary risk of rapid serum glucose correction in DKA?",
+        choices: ["a) Hypoglycemia", "b) Cerebral edema", "c) Increased ketone production", "d) Fluid overload"],
+        answer: "b) Cerebral edema"
+    },
+    {
+        question: "What is gabapentin’s mechanism of action for neuropathic pain?",
+        choices: ["a) Stimulates calcium channels", "b) Inhibits calcium influx into neurons", "c) Enhances glutamate release", "d) Blocks substance P receptors"],
+        answer: "b) Inhibits calcium influx into neurons"
+    },
+    {
+        question: "What condition is caused by sudden cessation of corticosteroids?",
+        choices: ["a) Addisonian crisis", "b) Hyperglycemia", "c) Hypertension", "d) Respiratory alkalosis"],
+        answer: "a) Addisonian crisis"
+    },
+    {
+        question: "Why are beta-blockers generally contraindicated in COPD patients?",
+        choices: ["a) They promote bronchoconstriction", "b) They increase mucus secretion", "c) They reduce oxygen diffusion", "d) They inhibit surfactant production"],
+        answer: "a) They promote bronchoconstriction"
+    },
+    {
+        question: "Why do ACE inhibitors cause a persistent dry cough?",
+        choices: ["a) Suppression of bradykinin breakdown", "b) Increased histamine production", "c) Direct irritation of airway epithelium", "d) Enhanced prostaglandin secretion"],
+        answer: "a) Suppression of bradykinin breakdown"
+    },
+    {
+        question: "What is the role of ANP in heart failure management?",
+        choices: ["a) Promotes sodium reabsorption", "b) Inhibits sodium reabsorption and reduces blood volume", "c) Enhances aldosterone secretion", "d) Increases vascular resistance"],
+        answer: "b) Inhibits sodium reabsorption and reduces blood volume"
+    },
+    {
+        question: "How do loop diuretics manage fluid overload?",
+        choices: ["a) Block sodium-potassium ATPase in the collecting ducts", "b) Inhibit Na⁺/K⁺/2Cl⁻ cotransporter in the loop of Henle", "c) Stimulate ADH release", "d) Promote potassium retention"],
+        answer: "b) Inhibit Na⁺/K⁺/2Cl⁻ cotransporter in the loop of Henle"
+    },
+    {
+        question: "How does spironolactone increase potassium levels?",
+        choices: ["a) Blocks sodium reabsorption in the proximal tubule", "b) Inhibits aldosterone in the distal tubule and collecting duct", "c) Promotes potassium excretion in the loop of Henle", "d) Stimulates ADH activity"],
+        answer: "b) Inhibits aldosterone in the distal tubule and collecting duct"
+    },
+    {
+        question: "Why might atropine be less effective in CKD patients?",
+        choices: ["a) Reduced parasympathetic tone", "b) Increased vagal activity", "c) Impaired sodium reabsorption", "d) Enhanced calcium retention"],
+        answer: "a) Reduced parasympathetic tone"
+    },
+    {
+        question: "What is the primary mechanism of action of clopidogrel?",
+        choices: ["a) Inhibits thromboxane A2 production", "b) Irreversibly blocks P2Y12 ADP receptors", "c) Promotes platelet aggregation", "d) Stimulates fibrin formation"],
+        answer: "b) Irreversibly blocks P2Y12 ADP receptors"
+    },
+    {
+        question: "How do calcium channel blockers reduce myocardial oxygen demand?",
+        choices: ["a) Increase preload", "b) Reduce afterload via arterial vasodilation", "c) Enhance myocardial contractility", "d) Stimulate beta-adrenergic receptors"],
+        answer: "b) Reduce afterload via arterial vasodilation"
+    },
+    {
+        question: "What is the role of prostacyclin in normal endothelial function?",
+        choices: ["a) Promotes platelet aggregation", "b) Inhibits platelet activation and aggregation", "c) Stimulates thrombin production", "d) Enhances clot stabilization"],
+        answer: "b) Inhibits platelet activation and aggregation"
+    },
+    {
+        question: "What does nitric oxide do in the context of coagulation?",
+        choices: ["a) Activates thrombin", "b) Stimulates vasodilation and inhibits platelet aggregation", "c) Increases fibrin formation", "d) Promotes platelet adhesion"],
+        answer: "b) Stimulates vasodilation and inhibits platelet aggregation"
+    },
+    {
+        question: "Which glycoprotein receptor on platelets binds to von Willebrand factor (vWF) immobilized on exposed collagen?",
+        choices: ["a) GP Ia/IIa", "b) GP VI", "c) GP Ib-V-IX", "d) GP IIb/IIIa"],
+        answer: "c) GP Ib-V-IX"
+    },
+    {
+        question: "What is the primary role of alpha granules in platelets?",
+        choices: ["a) House compounds like fibrinogen, vWF, and factor V", "b) Store ADP and TXA2", "c) Promote vasodilation", "d) Stabilize collagen"],
+        answer: "a) House compounds like fibrinogen, vWF, and factor V"
+    },
+    {
+        question: "What triggers platelets to become active during primary hemostasis?",
+        choices: ["a) Fibrin production", "b) Thrombin inhibition", "c) Exposure of collagen and ADP secretion by activated platelets", "d) Increased nitric oxide production"],
+        answer: "c) Exposure of collagen and ADP secretion by activated platelets"
+    },
+    {
+        question: "How do platelets change when activated?",
+        choices: ["a) Increase their volume", "b) Take on a stellate shape to increase surface area", "c) Lose their membrane glycoproteins", "d) Become less adhesive"],
+        answer: "b) Take on a stellate shape to increase surface area"
+    },
+    {
+        question: "What is the purpose of secondary hemostasis?",
+        choices: ["a) Activate platelets", "b) Stabilize the fragile platelet plug", "c) Promote vasodilation", "d) Dissolve the clot"],
+        answer: "b) Stabilize the fragile platelet plug"
+    },
+    {
+        question: "What does thrombin (factor IIa) act upon to form a fibrin mesh?",
+        choices: ["a) Factor VIII", "b) Factor XIII", "c) Fibrinogen (factor I)", "d) von Willebrand factor"],
+        answer: "c) Fibrinogen (factor I)"
+    },
+    {
+        question: "What initiates the intrinsic coagulation pathway?",
+        choices: ["a) External trauma", "b) Activation of factor XII by collagen", "c) Platelet adhesion", "d) Secretion of thromboxane A2"],
+        answer: "b) Activation of factor XII by collagen"
+    },
+    {
+        question: "What is the final common step in the coagulation cascade?",
+        choices: ["a) Activation of factor VIII", "b) Formation of thrombin", "c) Cross-linking of fibrin by factor XIIIa", "d) Conversion of fibrinogen to fibrin"],
+        answer: "c) Cross-linking of fibrin by factor XIIIa"
+    },
+    {
+        question: "Which enzyme converts arachidonic acid to prostaglandin G2?",
+        choices: ["a) Phospholipase A2", "b) Cyclooxygenase (COX-1/COX-2)", "c) Thromboxane synthase", "d) Peroxygenase"],
+        answer: "b) Cyclooxygenase (COX-1/COX-2)"
+    },
+    {
+        question: "How does aspirin inhibit platelet aggregation?",
+        choices: ["a) Blocks thrombin formation", "b) Inhibits COX enzymes, reducing thromboxane A2 production", "c) Increases nitric oxide synthesis", "d) Stabilizes von Willebrand factor"],
+        answer: "b) Inhibits COX enzymes, reducing thromboxane A2 production"
+    },
+    {
+        question: "What is the primary role of P2Y12 inhibitors?",
+        choices: ["a) Enhance thromboxane A2 synthesis", "b) Inhibit platelet activation by blocking ADP receptors", "c) Prevent fibrinogen production", "d) Increase vasodilation"],
+        answer: "b) Inhibit platelet activation by blocking ADP receptors"
+    },
+    {
+        question: "What is the preferred P2Y12 inhibitor for dual antiplatelet therapy?",
+        choices: ["a) Clopidogrel", "b) Ticagrelor", "c) Aspirin", "d) Heparin"],
+        answer: "b) Ticagrelor"
+    },
+    {
+        question: "How does factor Xa contribute to coagulation?",
+        choices: ["a) Converts prothrombin to thrombin", "b) Activates fibrinogen", "c) Promotes platelet adhesion", "d) Enhances vasodilation"],
+        answer: "a) Converts prothrombin to thrombin"
+    },
+    {
+        question: "What stabilizes the fibrin mesh in a clot?",
+        choices: ["a) Factor XIIIa cross-linking fibrin strands", "b) Thrombin inhibition", "c) Increased platelet aggregation", "d) Nitric oxide synthesis"],
+        answer: "a) Factor XIIIa cross-linking fibrin strands"
+    },
+    {
+        question: "What is a key difference between the extrinsic and intrinsic pathways of coagulation?",
+        choices: ["a) Extrinsic is slower than intrinsic", "b) Intrinsic is triggered by external trauma", "c) Extrinsic involves factor VII and tissue factor", "d) Intrinsic bypasses thrombin formation"],
+        answer: "c) Extrinsic involves factor VII and tissue factor"
+    },
+    {
+        question: "Which granule content activates nearby platelets via P2Y12 receptors?",
+        choices: ["a) ADP", "b) Fibrinogen", "c) Nitric oxide", "d) Heparin"],
+        answer: "a) ADP"
+    },
+    {
+        question: "What is the function of thrombomodulin?",
+        choices: ["a) Activates prothrombin", "b) Converts thrombin into an anticoagulant", "c) Promotes platelet aggregation", "d) Enhances fibrin cross-linking"],
+        answer: "b) Converts thrombin into an anticoagulant"
+    },
+    {
+        question: "Which clotting factor is carried by von Willebrand factor?",
+        choices: ["a) Factor V", "b) Factor VIII", "c) Factor X", "d) Factor XIII"],
+        answer: "b) Factor VIII"
+    },
+    {
+        question: "What is the primary effect of complement activation in anaphylaxis?",
+        choices: ["a) Direct pathogen lysis", "b) Increased histamine release from mast cells", "c) Increased vasodilation and chemotaxis of immune cells", "d) Inhibition of coagulation"],
+        answer: "c) Increased vasodilation and chemotaxis of immune cells"
+    },
+    {
+        question: "Which component of the complement system acts as an anaphylatoxin?",
+        choices: ["a) C3a and C5a", "b) C4b", "c) C6", "d) C9"],
+        answer: "a) C3a and C5a"
+    },
+    {
+        question: "How does adrenaline counteract the effects of anaphylatoxins like C3a and C5a?",
+        choices: ["a) Promotes vasodilation", "b) Induces vasoconstriction and reduces vascular permeability", "c) Blocks mast cell degranulation", "d) Enhances histamine release"],
+        answer: "b) Induces vasoconstriction and reduces vascular permeability"
+    },
+    {
+        question: "What intracellular pathway is primarily involved in mast cell stabilization during anaphylaxis?",
+        choices: ["a) cAMP pathway", "b) JAK-STAT pathway", "c) PI3K-AKT pathway", "d) MAP kinase pathway"],
+        answer: "a) cAMP pathway"
+    },
+    {
+        question: "Which immune cell is primarily responsible for the rapid release of histamine during anaphylaxis?",
+        choices: ["a) Neutrophils", "b) Eosinophils", "c) Mast cells", "d) T lymphocytes"],
+        answer: "c) Mast cells"
+    },
+    {
+        question: "What is the primary function of IgE antibodies in allergic reactions?",
+        choices: ["a) Activate neutrophils", "b) Bind to allergens and trigger mast cell degranulation", "c) Suppress histamine production", "d) Stimulate T cell activation"],
+        answer: "b) Bind to allergens and trigger mast cell degranulation"
+    },
+    {
+        question: "Which neuromuscular blocking agent is most commonly associated with anaphylaxis?",
+        choices: ["a) Rocuronium", "b) Atracurium", "c) Suxamethonium", "d) Vecuronium"],
+        answer: "a) Rocuronium"
+    },
+    {
+        question: "What is the mechanism of action of rocuronium at the neuromuscular junction?",
+        choices: ["a) Enhances acetylcholine release", "b) Binds to nicotinic receptors and prevents acetylcholine binding", "c) Inhibits acetylcholinesterase", "d) Stimulates calcium release"],
+        answer: "b) Binds to nicotinic receptors and prevents acetylcholine binding"
+    },
+    {
+        question: "Which cells are central to the adaptive immune response?",
+        choices: ["a) Neutrophils and macrophages", "b) Dendritic cells and natural killer cells", "c) T lymphocytes and B lymphocytes", "d) Eosinophils and basophils"],
+        answer: "c) T lymphocytes and B lymphocytes"
+    },
+    {
+        question: "What role do B lymphocytes play in immunity?",
+        choices: ["a) Directly kill infected cells", "b) Produce antibodies to neutralize pathogens", "c) Activate macrophages", "d) Release histamine"],
+        answer: "b) Produce antibodies to neutralize pathogens"
+    },
+    {
+        question: "What is the significance of major histocompatibility complex (MHC) in T cell activation?",
+        choices: ["a) Presents antigens to B cells for antibody production", "b) Presents antigens to T cells for activation", "c) Suppresses immune responses", "d) Stores immune memory"],
+        answer: "b) Presents antigens to T cells for activation"
+    },
+    {
+        question: "What is the primary mechanism of action of chlorphenamine?",
+        choices: ["a) Inhibits histamine synthesis", "b) Blocks H1 histamine receptors", "c) Stimulates histamine release", "d) Enhances histamine action"],
+        answer: "b) Blocks H1 histamine receptors"
+    },
+    {
+        question: "How does adrenaline induce bronchodilation during anaphylaxis?",
+        choices: ["a) Stimulates beta-2 adrenergic receptors", "b) Inhibits histamine release", "c) Blocks calcium influx", "d) Activates mast cells"],
+        answer: "a) Stimulates beta-2 adrenergic receptors"
+    },
+    {
+        question: "What triggers mast cell degranulation during an allergic reaction?",
+        choices: ["a) Complement activation", "b) Allergen binding to IgE on mast cells", "c) Histamine binding to H1 receptors", "d) Increased calcium efflux"],
+        answer: "b) Allergen binding to IgE on mast cells"
+    },
+    {
+        question: "What is the function of cAMP in mast cell stabilization?",
+        choices: ["a) Increases calcium influx", "b) Enhances degranulation", "c) Inhibits calcium influx", "d) Activates histamine release"],
+        answer: "c) Inhibits calcium influx"
+    },
+    {
+        question: "What is the primary symptom mitigated by adrenaline in anaphylaxis?",
+        choices: ["a) Hypertension", "b) Bronchoconstriction", "c) Hyperglycemia", "d) Leukopenia"],
+        answer: "b) Bronchoconstriction"
+    },
+    {
+        question: "Which mediator is released by mast cells and causes vasodilation and increased permeability?",
+        choices: ["a) Histamine", "b) Prostaglandins", "c) Cytokines", "d) Complement proteins"],
+        answer: "a) Histamine"
+    },
+    {
+        question: "What is the primary role of T helper cells in the immune system?",
+        choices: ["a) Kill infected cells", "b) Activate B cells and other immune cells", "c) Release histamine", "d) Suppress the immune response"],
+        answer: "b) Activate B cells and other immune cells"
+    },
+    {
+        question: "Which adrenergic receptor type is involved in vasoconstriction during anaphylaxis treatment?",
+        choices: ["a) Alpha-1", "b) Beta-1", "c) Beta-2", "d) Alpha-2"],
+        answer: "a) Alpha-1"
+    },
+    {
+        question: "What is the primary immune function of dendritic cells?",
+        choices: ["a) Phagocytose pathogens", "b) Activate neutrophils", "c) Present antigens to T cells", "d) Release antibodies"],
+        answer: "c) Present antigens to T cells"
+    },
+    {
+        question: "What is a leading cause of disability worldwide, affecting an estimated 280 million people?",
+        choices: ["a) Anxiety disorders", "b) Bipolar disorder", "c) Depression", "d) Schizophrenia"],
+        answer: "c) Depression"
+    },
+    {
+        question: "What percentage of individuals with depression are affected by treatment-resistant depression?",
+        choices: ["a) 20%", "b) 30%", "c) 50%", "d) 60%"],
+        answer: "b) 30%"
+    },
+    {
+        question: "Which neurotransmitter is commonly referred to as the \"feel-good\" chemical?",
+        choices: ["a) Dopamine", "b) Serotonin", "c) Noradrenaline", "d) Acetylcholine"],
+        answer: "b) Serotonin"
+    },
+    {
+        question: "How do Selective Serotonin Reuptake Inhibitors (SSRIs) function?",
+        choices: ["a) Increase serotonin breakdown", "b) Block serotonin receptors", "c) Block serotonin reuptake, increasing its availability", "d) Decrease serotonin production"],
+        answer: "c) Block serotonin reuptake, increasing its availability"
+    },
+    {
+        question: "What is a potential risk associated with SSRI use in the elderly?",
+        choices: ["a) Serotonin syndrome and hyponatremia", "b) Bradycardia", "c) Hypokalemia", "d) Hypercalcemia"],
+        answer: "a) Serotonin syndrome and hyponatremia"
+    },
+    {
+        question: "What is the primary mechanism of action of carbamazepine?",
+        choices: ["a) Enhances dopamine release", "b) Blocks voltage-gated sodium channels in neurons", "c) Inhibits serotonin reuptake", "d) Activates GABA receptors"],
+        answer: "b) Blocks voltage-gated sodium channels in neurons"
+    },
+    {
+        question: "What symptoms are associated with severe hyponatremia caused by SIADH?",
+        choices: ["a) Muscle cramps and confusion", "b) Tremors and agitation", "c) Bradycardia and hypotension", "d) Seizures and coma"],
+        answer: "d) Seizures and coma"
+    },
+    {
+        question: "What is the primary source of noradrenaline production in the brain?",
+        choices: ["a) Substantia nigra", "b) Locus coeruleus", "c) Hippocampus", "d) Amygdala"],
+        answer: "b) Locus coeruleus"
+    },
+    {
+        question: "Which medication prevents the breakdown of monoamines, including serotonin and dopamine?",
+        choices: ["a) SSRIs", "b) Tricyclic antidepressants (TCAs)", "c) Monoamine oxidase inhibitors (MAOIs)", "d) Ketamine"],
+        answer: "c) Monoamine oxidase inhibitors (MAOIs)"
+    },
+    {
+        question: "Which neurotransmitter is most significantly involved in Parkinson’s disease?",
+        choices: ["a) Serotonin", "b) Dopamine", "c) Acetylcholine", "d) Noradrenaline"],
+        answer: "b) Dopamine"
+    },
+    {
+        question: "What is the mechanism of action of ketamine as an antidepressant?",
+        choices: ["a) Blocks serotonin reuptake", "b) Antagonizes NMDA receptors", "c) Activates dopamine receptors", "d) Inhibits monoamine oxidase"],
+        answer: "b) Antagonizes NMDA receptors"
+    },
+    {
+        question: "What is the primary mechanism by which diazepam exerts its anxiolytic effects?",
+        choices: ["a) Enhances GABA activity at GABA-A receptors", "b) Blocks NMDA receptors", "c) Inhibits serotonin reuptake", "d) Activates dopamine receptors"],
+        answer: "a) Enhances GABA activity at GABA-A receptors"
+    },
+    {
+        question: "What neurotransmitter system is downregulated during chronic alcohol use?",
+        choices: ["a) Dopamine", "b) GABA", "c) Serotonin", "d) Glutamate"],
+        answer: "b) GABA"
+    },
+    {
+        question: "Which neurotransmitters hyperactivity is associated with schizophrenia’s positive symptoms?",
+        choices: ["a) Dopamine in the mesolimbic pathway", "b) Serotonin in the hippocampus", "c) GABA in the amygdala", "d) Noradrenaline in the locus coeruleus"],
+        answer: "a) Dopamine in the mesolimbic pathway"
+    },
+    {
+        question: "What medication is most likely to cause extrapyramidal symptoms (EPS)?",
+        choices: ["a) Clozapine", "b) Risperidone", "c) Haloperidol", "d) Olanzapine"],
+        answer: "c) Haloperidol"
+    },
+    {
+        question: "What is the main side effect of mirtazapine contributing to weight gain?",
+        choices: ["a) Increased appetite due to histamine receptor antagonism", "b) Enhanced serotonin release", "c) Activation of dopamine receptors", "d) Stimulation of GABA activity"],
+        answer: "a) Increased appetite due to histamine receptor antagonism"
+    },
+    {
+        question: "What pathway is targeted by antipsychotic medications to reduce schizophrenia’s positive symptoms?",
+        choices: ["a) Mesocortical pathway", "b) Mesolimbic pathway", "c) Nigrostriatal pathway", "d) Hypothalamic pathway"],
+        answer: "b) Mesolimbic pathway"
+    },
+    {
+        question: "Which condition is treated with levodopa to cross the blood-brain barrier and increase dopamine?",
+        choices: ["a) Schizophrenia", "b) Depression", "c) Parkinson’s disease", "d) Anxiety disorders"],
+        answer: "c) Parkinson’s disease"
+    },
+    {
+        question: "What is the default mode network (DMN) associated with in depression?",
+        choices: ["a) Increased focus and decision-making", "b) Hyperconnectivity and rumination", "c) Enhanced emotional regulation", "d) Decreased cognitive function"],
+        answer: "b) Hyperconnectivity and rumination"
+    },
+    {
+        question: "Which neurotransmitter is most implicated in the pathophysiology of schizophrenia?",
+        choices: ["a) Serotonin", "b) Dopamine", "c) Noradrenaline", "d) GABA"],
+        answer: "b) Dopamine"
+    },
+    {
+        question: "What is the primary function of pathophysiology in paramedic practice?",
+        choices: ["a) Diagnosing diseases", "b) Understanding functional changes due to diseases or injuries", "c) Monitoring medication effects", "d) Conducting laboratory tests"],
+        answer: "b) Understanding functional changes due to diseases or injuries"
+    },
+    {
+        question: "Which vital sign changes are typical of hemorrhagic shock?",
+        choices: ["a) Bradycardia, hypertension", "b) Tachycardia, hypotension", "c) Tachypnea, hypertension", "d) Bradycardia, normal blood pressure"],
+        answer: "b) Tachycardia, hypotension"
+    },
+    {
+        question: "What is the role of baroreceptors in hemorrhagic shock?",
+        choices: ["a) Release cytokines", "b) Detect changes in blood pressure and activate compensatory mechanisms", "c) Monitor blood oxygen levels", "d) Control hormone secretion"],
+        answer: "b) Detect changes in blood pressure and activate compensatory mechanisms"
+    },
+    {
+        question: "Which substance is released by renal juxtaglomerular cells in response to reduced perfusion?",
+        choices: ["a) Nitric oxide", "b) Cytokines", "c) Renin", "d) Aldosterone"],
+        answer: "c) Renin"
+    },
+    {
+        question: "What is the primary action of angiotensin II in the RAAS pathway?",
+        choices: ["a) Causes vasodilation", "b) Promotes sodium and water excretion", "c) Causes vasoconstriction and stimulates aldosterone release", "d) Reduces systemic vascular resistance"],
+        answer: "c) Causes vasoconstriction and stimulates aldosterone release"
+    },
+    {
+        question: "Which compensatory mechanism fails first in decompensated shock?",
+        choices: ["a) Fluid redistribution", "b) Tachycardia", "c) Vasoconstriction", "d) Hormonal response"],
+        answer: "c) Vasoconstriction"
+    },
+    {
+        question: "What happens when preload is significantly reduced during hemorrhagic shock?",
+        choices: ["a) The Frank-Starling mechanism increases stroke volume", "b) Tachycardia alone maintains cardiac output", "c) Stroke volume decreases, and tachycardia cannot compensate", "d) The heart contracts more forcefully"],
+        answer: "c) Stroke volume decreases, and tachycardia cannot compensate"
+    },
+    {
+        question: "Which receptors mediate the sympathetic nervous systems increase in heart rate?",
+        choices: ["a) Alpha-1 adrenergic receptors", "b) Beta-1 adrenergic receptors", "c) Beta-2 adrenergic receptors", "d) Muscarinic receptors"],
+        answer: "b) Beta-1 adrenergic receptors"
+    },
+    {
+        question: "How does increased capillary permeability affect fluid distribution in hemorrhagic shock?",
+        choices: ["a) Reduces fluid movement into interstitial spaces", "b) Causes fluid to shift into interstitial spaces, reducing vascular volume", "c) Enhances fluid movement into the vascular compartment", "d) Prevents fluid movement across membranes"],
+        answer: "b) Causes fluid to shift into interstitial spaces, reducing vascular volume"
+    },
+    {
+        question: "What triggers ADH secretion during shock?",
+        choices: ["a) Decreased plasma osmolality", "b) Increased plasma osmolality and decreased blood pressure", "c) Increased blood volume", "d) High oxygen levels"],
+        answer: "b) Increased plasma osmolality and decreased blood pressure"
+    },
+    {
+        question: "What is the primary neurotransmitter associated with excitotoxicity in TBI?",
+        choices: ["a) Dopamine", "b) Serotonin", "c) Glutamate", "d) Acetylcholine"],
+        answer: "c) Glutamate"
+    },
+    {
+        question: "What effect does increased intracranial pressure (ICP) have on cerebral autoregulation?",
+        choices: ["a) Enhances blood flow", "b) Improves autoregulation", "c) Impairs autoregulation, making cerebral blood flow dependent on systemic pressure", "d) Stops blood flow to the brain"],
+        answer: "c) Impairs autoregulation, making cerebral blood flow dependent on systemic pressure"
+    },
+    {
+        question: "Which mechanism of action is associated with Tranexamic Acid (TXA)?",
+        choices: ["a) Stimulates clotting factor production", "b) Inhibits fibrinolysis by blocking plasminogen binding to fibrin", "c) Enhances platelet aggregation", "d) Causes vasoconstriction to reduce bleeding"],
+        answer: "b) Inhibits fibrinolysis by blocking plasminogen binding to fibrin"
+    },
+    {
+        question: "What condition is most effectively treated with Tranexamic Acid?",
+        choices: ["a) Hyperglycemia", "b) Hemorrhagic shock", "c) Hypovolemia", "d) Hyperkalemia"],
+        answer: "b) Hemorrhagic shock"
+    },
+    {
+        question: "Which brain structure is associated with nausea and vomiting in TBI?",
+        choices: ["a) Cerebellum", "b) Brainstem", "c) Occipital lobe", "d) Hippocampus"],
+        answer: "b) Brainstem"
+    },
+    {
+        question: "Which hormone is involved in sodium and water retention during hemorrhagic shock?",
+        choices: ["a) ADH", "b) Aldosterone", "c) Insulin", "d) Thyroxine"],
+        answer: "b) Aldosterone"
+    },
+    {
+        question: "What is the main outcome of hypoxia in TBI?",
+        choices: ["a) Improved cerebral perfusion", "b) Enhanced oxygen delivery", "c) Cellular damage and anaerobic metabolism", "d) Increased glucose metabolism"],
+        answer: "c) Cellular damage and anaerobic metabolism"
+    },
+    {
+        question: "What type of injury results from shearing forces in TBI?",
+        choices: ["a) Cerebral contusion", "b) Diffuse axonal injury (DAI)", "c) Hematoma", "d) Laceration"],
+        answer: "b) Diffuse axonal injury (DAI)"
+    },
+    {
+        question: "Which of the following is a sign of decompensated shock?",
+        choices: ["a) Hypertension", "b) Bradycardia", "c) Metabolic acidosis and hypotension", "d) Normal blood pressure"],
+        answer: "c) Metabolic acidosis and hypotension"
+    },
+    {
+        question: "What is the calculated cerebral perfusion pressure (CPP) formula?",
+        choices: ["a) CPP = ICP + BP", "b) CPP = MAP - ICP", "c) CPP = HR × SV", "d) CPP = CO / BP"],
+        answer: "b) CPP = MAP - ICP"
+    },
+    {
+        question: "How does rocuronium prevent muscle contraction?",
+        choices: ["a) Promoting acetylcholinesterase activity", "b) Inhibiting acetylcholine binding at nicotinic receptors", "c) Blocking calcium channels", "d) Stimulating muscarinic receptors"],
+        answer: "b) Inhibiting acetylcholine binding at nicotinic receptors"
+    },
+    {
+        question: "Corticosteroids suppress inflammation by",
+        choices: ["a) Enhancing prostaglandin production", "b) Inhibiting phospholipase A2", "c) Reducing nitric oxide synthesis", "d) Promoting leukocyte adhesion"],
+        answer: "b) Inhibiting phospholipase A2"
+    },
+    {
+        question: "After an infection, what happens to some T and B cells?",
+        choices: ["a) They produce more antibodies", "b) They are eliminated by apoptosis", "c) They turn into memory cells", "d) They become phagocytes"],
+        answer: "c) They turn into memory cells"
+    },
+    {
+        question: "In AKI patients, what is the main concern with NSAID use?",
+        choices: ["a) Enhanced sodium reabsorption", "b) Reduced calcium excretion", "c) Increased GFR", "d) Decreased renal perfusion"],
+        answer: "d) Decreased renal perfusion"
+    },
+    {
+        question: "The vagomimetic effect of digoxin primarily affects which cardiac structure?",
+        choices: ["a) AV node", "b) SA node", "c) Bundle of His", "d) Purkinje fibers"],
+        answer: "a) AV node"
+    },
+    {
+        question: "How does ADH maintain blood pressure during hemorrhagic shock?",
+        choices: ["a) Increasing heart rate", "b) Decreasing systemic vascular resistance", "c) Promoting water reabsorption and vasoconstriction", "d) Promoting diuresis"],
+        answer: "c) Promoting water reabsorption and vasoconstriction"
+    },
+    {
+        question: "How does TXA (tranexamic acid) reduce fibrinolysis in trauma patients?",
+        choices: ["a) By binding to lysine-binding sites on plasminogen", "b) By stimulating plasmin synthesis", "c) By increasing fibrin breakdown", "d) By inhibiting thrombin activation"],
+        answer: "a) By binding to lysine-binding sites on plasminogen"
+    },
+    {
+        question: "Which hormone is deficient in secondary adrenal insufficiency?",
+        choices: ["a) Cortisol", "b) ACTH", "c) Aldosterone", "d) Renin"],
+        answer: "b) ACTH"
+    },
+    {
+        question: "ACE inhibitors reduce proteinuria in diabetic patients by",
+        choices: ["a) Promoting sodium excretion", "b) Decreasing glomerular filtration rate", "c) Increasing renin release", "d) Reducing glomerular hypertension"],
+        answer: "d) Reducing glomerular hypertension"
+    },
+    {
+        question: "What is the primary mechanism of action of aspirin in inhibiting platelet aggregation?",
+        choices: ["a) Inhibiting thrombin formation", "b) Increasing fibrin breakdown", "c) Blocking ADP receptors", "d) Inhibiting COX-1 to reduce thromboxane A2 synthesis"],
+        answer: "d) Inhibiting COX-1 to reduce thromboxane A2 synthesis"
+    },
+    {
+        question: "What is a common adverse effect of sulfonylureas?",
+        choices: ["a) Hypoglycaemia", "b) Hyperkalaemia", "c) Hyperglycaemia", "d) Hyponatremia"],
+        answer: "a) Hypoglycaemia"
+    },
+    {
+        question: "Which of the following steps does NOT occur in the renin-angiotensin-aldosterone system (RAAS) pathway during haemorrhagic shock?",
+        choices: ["a) Angiotensin I is converted to angiotensin II by angiotensin-converting enzyme (ACE)", "b) Angiotensin II stimulates aldosterone release", "c) Renin converts angiotensinogen to angiotensin I", "d) Angiotensin II causes vasodilation"],
+        answer: "d) Angiotensin II causes vasodilation"
+    },
+    {
+        question: "How do beta-2 agonists promote bronchodilation?",
+        choices: ["a) By promoting calcium influx into smooth muscle cells", "b) By blocking acetylcholine release", "c) By inhibiting M3 receptors", "d) By increasing cyclic AMP levels in smooth muscle"],
+        answer: "d) By increasing cyclic AMP levels in smooth muscle"
+    },
+    {
+        question: "What is a key benefit of combining LABA with ICS in asthma management?",
+        choices: ["a) LABAs prevent airway remodeling", "b) LABAs reduce airway inflammation", "c) ICS provide rapid relief", "d) LABAs control bronchoconstriction while ICS reduce inflammation"],
+        answer: "d) LABAs control bronchoconstriction while ICS reduce inflammation"
+    },
+    {
+        question: "Which of the following best describes the effect of adrenaline on mast cells during anaphylaxis?",
+        choices: ["a) Promotes bronchoconstriction", "b) Inhibits histamine release", "c) Increases histamine release", "d) Causes vasoconstriction"],
+        answer: "b) Inhibits histamine release"
+    },
+    {
+        question: "In heart failure with reduced ejection fraction (HFrEF), what is the most common hemodynamic change observed?",
+        choices: ["a) Reduced sympathetic activation", "b) Increased preload and decreased ejection fraction", "c) Increased cardiac output", "d) Decreased afterload"],
+        answer: "b) Increased preload and decreased ejection fraction"
+    },
+    {
+        question: "What is the main adverse effect of prolonged tachycardia in haemorrhagic shock?",
+        choices: ["a) Enhanced myocardial oxygen supply", "b) Increased stroke volume", "c) Increased coronary perfusion", "d) Decreased coronary perfusion"],
+        answer: "d) Decreased coronary perfusion"
+    },
+    {
+        question: "What is the main role of plasma cells derived from B cells during the immune response?",
+        choices: ["a) Cytokine release", "b) Direct pathogen destruction", "c) Antibody production", "d) T-cell activation"],
+        answer: "c) Antibody production"
+    },
+    {
+        question: "What is the primary advantage of second-generation antipsychotics over first-generation in schizophrenia treatment?",
+        choices: ["a) Enhanced serotonin blockade", "b) Increased dopamine release", "c) Lower risk of metabolic syndrome", "d) Decreased risk of extrapyramidal symptoms"],
+        answer: "d) Decreased risk of extrapyramidal symptoms"
+    },
+    {
+        question: "Which drug is used to prevent ADP-mediated platelet activation?",
+        choices: ["a) Aspirin", "b) Clopidogrel", "c) Warfarin", "d) Heparin"],
+        answer: "b) Clopidogrel"
+    },
+    {
+        question: "Which of the following is a key concern when administering oxygen to patients with Type 2 respiratory failure?",
+        choices: ["a) Promoting bronchoconstriction", "b) Reducing alveolar dead space", "c) Worsening V/Q mismatch", "d) \xa0Improving V/Q ratio"],
+        answer: "c) Worsening V/Q mismatch"
+    },
+    {
+        question: "How do SGLT2 inhibitors benefit heart failure patients beyond glucose control?",
+        choices: ["a) Reducing myocardial oxygen demand", "b) Promoting osmotic diuresis", "c) Enhancing myocardial contractility", "d) Inhibiting beta-adrenergic receptors"],
+        answer: "b) Promoting osmotic diuresis"
+    },
+    {
+        question: "What electrolyte imbalance is most commonly associated with loop diuretics?",
+        choices: ["a) Hypermagnesemia", "b) Hypocalcemia", "c) \xa0Hypernatremia", "d) Hypokalemia"],
+        answer: "d) Hypokalemia"
+    },
+    {
+        question: "What triggers the activation of C1 in the classical complement pathway?",
+        choices: ["a) Activation by mannose-binding lectins", "b) Binding to antibodies attached to antigens", "c) Binding to anaphylatoxins", "d) Direct binding to microbial surfaces"],
+        answer: "b) Binding to antibodies attached to antigens"
+    },
+    {
+        question: "Which inflammatory mediators are primarily responsible for increased capillary permeability during hemorrhagic shock?",
+        choices: ["a) Histamine and bradykinin", "b) Acetylcholine and norepinephrine", "c) Prostaglandins and nitric oxide", "d) TNF-α and IL-6"],
+        answer: "a) Histamine and bradykinin"
+    },
+    {
+        question: "Which of the following does NOT occur as a result of glutamate-induced excitotoxicity?",
+        choices: ["a) Neuronal death", "b) Enhanced neuronal growth", "c) Increased intracellular calcium", "d) Overactivation of NMDA receptors"],
+        answer: "b) Enhanced neuronal growth"
+    },
+    {
+        question: "Which electrolyte imbalance is most commonly caused by thiazide diuretics?",
+        choices: ["a) Hypercalcemia", "b) Hypokalemia", "c) Hyponatremia", "d) Hypermagnesemia"],
+        answer: "c) Hyponatremia"
+    },
+    {
+        question: "Which electrolyte imbalance is most associated with SSRIs in the elderly?",
+        choices: ["a) Hyperkalaemia", "b) Hyponatremia", "c) Hypernatremia", "d) Hypocalcemia"],
+        answer: "b) Hyponatremia"
+    },
+    {
+        question: "What is a serious adverse effect of rapid correction of hypernatremia in patients with dehydration?",
+        choices: ["a) Cerebral oedema", "b) Hyperglycemia", "c) Hypokalaemia", "d) Metabolic alkalosis"],
+        answer: "a) Cerebral oedema"
+    },
+    {
+        question: "Ondansetron acts primarily through which receptor?",
+        choices: ["a) 5-HT3", "b) 5-HT2", "c) Dopamine D2", "d) \xa05-HT1"],
+        answer: "a) 5-HT3"
+    }
+        ];
+
+        let score = 0; // Initialize score
+        const userAnswers = new Array(quiz.length).fill(null); // Keep track of user answers
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById("quiz-container");
+
+            quiz.forEach((item, index) => {
+                // Create question div
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question");
+                questionDiv.innerHTML = `<p><strong>${index + 1}. ${item.question}</strong></p>`;
+
+                // Create choices div
+                const choicesDiv = document.createElement("div");
+                choicesDiv.classList.add("choices");
+
+                item.choices.forEach(choice => {
+                    const choiceHTML = `
+                        <label>
+                            <input type="radio" name="question${index}" value="${choice}" onclick="checkAnswer(${index}, '${choice}')">
+                            ${choice}
+                        </label><br>
+                    `;
+                    choicesDiv.innerHTML += choiceHTML;
+                });
+
+                // Create feedback div
+                const feedbackDiv = document.createElement("div");
+                feedbackDiv.classList.add("feedback");
+                feedbackDiv.id = `feedback${index}`;
+
+                // Append elements
+                questionDiv.appendChild(choicesDiv);
+                questionDiv.appendChild(feedbackDiv);
+                quizContainer.appendChild(questionDiv);
+            });
+        }
+
+        function checkAnswer(index, selectedChoice) {
+            const feedbackDiv = document.getElementById(`feedback${index}`);
+            const scoreDiv = document.getElementById("score");
+
+            // Update the user's answer and adjust the score if necessary
+            if (userAnswers[index] === quiz[index].answer) {
+                // If the previous answer was correct, subtract 1 from the score
+                score--;
+            }
+            if (selectedChoice === quiz[index].answer) {
+                // If the new answer is correct, add 1 to the score
+                score++;
+            }
+            userAnswers[index] = selectedChoice; // Update user's answer
+
+            // Provide feedback
+            if (selectedChoice === quiz[index].answer) {
+                feedbackDiv.innerHTML = `<span class="correct">Correct!</span>`;
+            } else {
+                feedbackDiv.innerHTML = `<span class="wrong">Wrong. The correct answer is ${quiz[index].answer}.</span>`;
+            }
+
+            // Update the score display
+            scoreDiv.innerHTML = `Score: ${score}`;
+        }
+
+        // Load the quiz on page load
+        window.onload = loadQuiz;
+    </script>
+</body>
+</html>
