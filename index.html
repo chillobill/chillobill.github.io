@@ -37,8 +37,15 @@
     <div id="quiz-container"></div>
     <div id="score">Score: 0</div>
 
-    <script>
-        const quiz = [
+<script>
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    const quiz = [
     {
         question: "What creates a hypertonic environment outside the cells, leading to cellular dehydration?",
         choices: ["a) High glucose concentration", "b) High sodium ion concentration", "c) Low protein levels", "d) Increased bicarbonate levels"],
@@ -991,72 +998,74 @@
     }
         ];
 
-        let score = 0; // Initialize score
-        const userAnswers = new Array(quiz.length).fill(null); // Keep track of user answers
+    shuffle(quiz); // Shuffle the quiz array before rendering
 
-        function loadQuiz() {
-            const quizContainer = document.getElementById("quiz-container");
+    let score = 0; // Initialize score
+    const userAnswers = new Array(quiz.length).fill(null); // Keep track of user answers
 
-            quiz.forEach((item, index) => {
-                // Create question div
-                const questionDiv = document.createElement("div");
-                questionDiv.classList.add("question");
-                questionDiv.innerHTML = `<p><strong>${index + 1}. ${item.question}</strong></p>`;
+    function loadQuiz() {
+        const quizContainer = document.getElementById("quiz-container");
 
-                // Create choices div
-                const choicesDiv = document.createElement("div");
-                choicesDiv.classList.add("choices");
+        quiz.forEach((item, index) => {
+            // Create question div
+            const questionDiv = document.createElement("div");
+            questionDiv.classList.add("question");
+            questionDiv.innerHTML = `<p><strong>${index + 1}. ${item.question}</strong></p>`;
 
-                item.choices.forEach(choice => {
-                    const choiceHTML = `
-                        <label>
-                            <input type="radio" name="question${index}" value="${choice}" onclick="checkAnswer(${index}, '${choice}')">
-                            ${choice}
-                        </label><br>
-                    `;
-                    choicesDiv.innerHTML += choiceHTML;
-                });
+            // Create choices div
+            const choicesDiv = document.createElement("div");
+            choicesDiv.classList.add("choices");
 
-                // Create feedback div
-                const feedbackDiv = document.createElement("div");
-                feedbackDiv.classList.add("feedback");
-                feedbackDiv.id = `feedback${index}`;
-
-                // Append elements
-                questionDiv.appendChild(choicesDiv);
-                questionDiv.appendChild(feedbackDiv);
-                quizContainer.appendChild(questionDiv);
+            item.choices.forEach(choice => {
+                const choiceHTML = `
+                    <label>
+                        <input type="radio" name="question${index}" value="${choice}" onclick="checkAnswer(${index}, '${choice}')">
+                        ${choice}
+                    </label><br>
+                `;
+                choicesDiv.innerHTML += choiceHTML;
             });
+
+            // Create feedback div
+            const feedbackDiv = document.createElement("div");
+            feedbackDiv.classList.add("feedback");
+            feedbackDiv.id = `feedback${index}`;
+
+            // Append elements
+            questionDiv.appendChild(choicesDiv);
+            questionDiv.appendChild(feedbackDiv);
+            quizContainer.appendChild(questionDiv);
+        });
+    }
+
+    function checkAnswer(index, selectedChoice) {
+        const feedbackDiv = document.getElementById(`feedback${index}`);
+        const scoreDiv = document.getElementById("score");
+
+        // Update the user's answer and adjust the score if necessary
+        if (userAnswers[index] === quiz[index].answer) {
+            // If the previous answer was correct, subtract 1 from the score
+            score--;
+        }
+        if (selectedChoice === quiz[index].answer) {
+            // If the new answer is correct, add 1 to the score
+            score++;
+        }
+        userAnswers[index] = selectedChoice; // Update user's answer
+
+        // Provide feedback
+        if (selectedChoice === quiz[index].answer) {
+            feedbackDiv.innerHTML = `<span class="correct">Correct!</span>`;
+        } else {
+            feedbackDiv.innerHTML = `<span class="wrong">Wrong. The correct answer is ${quiz[index].answer}.</span>`;
         }
 
-        function checkAnswer(index, selectedChoice) {
-            const feedbackDiv = document.getElementById(`feedback${index}`);
-            const scoreDiv = document.getElementById("score");
+        // Update the score display
+        scoreDiv.innerHTML = `Score: ${score}`;
+    }
 
-            // Update the user's answer and adjust the score if necessary
-            if (userAnswers[index] === quiz[index].answer) {
-                // If the previous answer was correct, subtract 1 from the score
-                score--;
-            }
-            if (selectedChoice === quiz[index].answer) {
-                // If the new answer is correct, add 1 to the score
-                score++;
-            }
-            userAnswers[index] = selectedChoice; // Update user's answer
-
-            // Provide feedback
-            if (selectedChoice === quiz[index].answer) {
-                feedbackDiv.innerHTML = `<span class="correct">Correct!</span>`;
-            } else {
-                feedbackDiv.innerHTML = `<span class="wrong">Wrong. The correct answer is ${quiz[index].answer}.</span>`;
-            }
-
-            // Update the score display
-            scoreDiv.innerHTML = `Score: ${score}`;
-        }
-
-        // Load the quiz on page load
-        window.onload = loadQuiz;
-    </script>
+    // Load the quiz on page load
+    window.onload = loadQuiz;
+</script>
 </body>
 </html>
