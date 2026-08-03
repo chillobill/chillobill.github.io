@@ -1,5 +1,5 @@
 
-# Manual documentation challenges:
+# Automatic documentation challenges:
 Time consuming
 Low priority
 Prone to error
@@ -12,7 +12,7 @@ The motivations for automated doc generation
 
 His solution combines a series of tools, each of which does only one thing. The tools will work together. He suggests two different toolset options:
 
-## 1. Starter Package:
+## 1. Starter Package For Testing:
 Markdown
 Mermaid
 PlantUML
@@ -22,12 +22,6 @@ Docker
 Markdown is included because it’s a simple yet powerful text editor. Mermaid and PlantUML can take text files and turn them into diagrams and charts. Or you can take a Jinja2 template and turni it into a diagram via PlantUML.
 
 ## 2. Advanced Package:
-Jenkins
-Git
-Version Control system
-Pandoc
-LaTeX
-AI
 Git helps you track changes to your plaintext files, compare changes, create different branches, and commit. Git can be combined with version control systems such as GitHub, GitLab, and others to help you track changes, get change management controls, and integrate with a CI/CD pipeline.
 Pandoc is a universal document converter. So for example, you can convert a Markdown file to Word or a PDF.
 
