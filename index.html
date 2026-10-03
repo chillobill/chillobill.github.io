@@ -1,58 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Quiz with Real-Time Score Update</title>
-    <style>
-        h1 {
-            color: gainsboro;
-        }
-        body {
-            background-color:#1d2a35;
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .question {
-            color: gainsboro;
-            margin-bottom: 15px;
-        }
-        .choices {
-            color: gray;
-            margin-bottom: 10px;
-        }
-        .feedback {
-            margin-top: 5px;
-            font-weight: bold;
-        }
-        .correct {
-            color: palegreen;
-        }
-        .wrong {
-            color: salmon;
-        }
-        #score {
-            color: gainsboro;
-            font-size: 1.2em;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#143e3b">
+  <meta name="description" content="An interactive clinical revision quiz with instant feedback and progress tracking.">
+  <title>Clinical revision · Practice quiz</title>
+  <style>
+    :root{color-scheme:light;--ink:#193b38;--muted:#61736e;--green:#256958;--paper:#f5f5ef;--line:#dce3da;--white:#fff;--red:#923b37}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #c58c32;outline-offset:4px}button{touch-action:manipulation}a{color:inherit}
+    .layout{min-height:100vh;display:grid;grid-template-columns:280px 1fr}.sidebar{background:#143e3b;color:#edf4ed;padding:36px 28px;display:flex;flex-direction:column;gap:36px}.brand{display:flex;align-items:center;gap:12px;font-weight:650;letter-spacing:-.4px}.mark{width:38px;height:38px;border:1px solid #6d9287;border-radius:12px;display:grid;place-items:center;font-size:25px;color:#c9e6c8}.eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px}.sidebar .eyebrow{color:#a9c5ba}.session-label{font-size:23px;line-height:1.25;letter-spacing:-.6px;margin:12px 0}.sidebar p{font-size:13px;color:#b7cdc4}.side-link{padding:12px 14px;border-radius:9px;background:#28504a;display:flex;align-items:center;gap:10px;font-size:14px}.dot{width:7px;height:7px;border-radius:50%;background:#b8d8a5}.sidebar-bottom{margin-top:auto;border-top:1px solid #41635a;padding-top:18px}.sidebar-bottom p{margin:6px 0}
+    main{width:100%;max-width:1140px;margin:auto;padding:30px 54px 36px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:22px;font-size:12px;color:var(--muted)}.pill{background:#e7ecdf;color:#466348;padding:5px 12px;border-radius:30px;font-weight:600}.hero{padding:35px 0 26px;display:flex;align-items:end;justify-content:space-between;gap:24px}h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(32px,4vw,46px);line-height:1.15;letter-spacing:-1.5px;margin:10px 0 12px}.hero p{margin:0;color:var(--muted);font-size:14px}.text-button{background:transparent;border:1px solid var(--line);border-radius:8px;padding:9px 14px;color:var(--ink);font-size:13px;white-space:nowrap}.text-button:hover{background:#e9eee3}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;background:#eeeee6;margin-bottom:26px}.stat{padding:15px 22px}.stat+.stat{border-left:1px solid var(--line)}.stat-label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}.stat strong{font-size:22px;font-weight:600;letter-spacing:-.5px}.stat small{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}.progress-heading{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}progress{width:100%;height:5px;display:block;border:0;border-radius:5px;background:#dfe5d9;accent-color:var(--green)}progress::-webkit-progress-bar{background:#dfe5d9;border-radius:5px}progress::-webkit-progress-value{background:var(--green);border-radius:5px}progress::-moz-progress-bar{background:var(--green);border-radius:5px}
+    .card{background:var(--white);border:1px solid var(--line);border-radius:16px;margin-top:22px;overflow:hidden;box-shadow:0 8px 24px #193b3805}.card-header{display:flex;justify-content:space-between;align-items:center;padding:22px 28px 0;gap:12px}.question-count{font-size:11px;font-weight:700;letter-spacing:1.3px;color:var(--green);text-transform:uppercase}.status{font-size:11px;color:var(--muted);background:#f3f5ef;padding:4px 10px;border-radius:30px}.question-body{padding:20px 28px 28px}fieldset{border:0;padding:0;margin:0;min-width:0}legend{font-size:21px;font-weight:550;line-height:1.45;letter-spacing:-.4px;padding:0;width:100%;margin-bottom:22px}.choices{display:grid;gap:10px}.choice{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid #dfe5dc;border-radius:9px;cursor:pointer;transition:background .15s,border-color .15s;position:relative;line-height:1.5;font-size:14px}.choice:hover{background:#f6f8f1;border-color:#9eb6a5}.choice:focus-within{outline:3px solid #c58c32;outline-offset:2px}.choice input{position:absolute;opacity:0;width:1px;height:1px}.letter{flex-shrink:0;width:30px;height:30px;display:grid;place-items:center;border:1px solid #d9e1d5;border-radius:7px;font-size:12px;font-weight:600;color:#6a7b6d}.choice.selected{border-color:var(--green);background:#eef5eb}.choice.selected .letter{background:var(--green);color:white;border-color:var(--green)}.choice.incorrect{border-color:#c98178;background:#fcf1ee}.choice.incorrect .letter{background:var(--red);border-color:var(--red);color:white}.choice.correct-answer{border-color:#91b89c;background:#f1f7ed}.feedback{padding:14px 16px;border-radius:9px;margin-top:18px;background:#edf5e9;color:#28533c;font-size:13px}.feedback.wrong{background:#fbf0ed;color:var(--red)}.feedback:empty{display:none}.card-footer{border-top:1px solid #edf0e9;padding:18px 28px;display:flex;justify-content:space-between;gap:16px;align-items:center;background:#fafbf7}.primary{border:1px solid var(--green);background:var(--green);color:white;border-radius:8px;padding:10px 19px;font-size:13px;font-weight:600}.primary:hover{background:#174d3e}.nav-hint{font-size:11px;color:var(--muted);margin-left:auto}.below{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-top:18px;color:var(--muted);font-size:11px}.below button{border:0;background:transparent;color:var(--green);padding:6px 0;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+    dialog{width:min(680px,calc(100% - 32px));max-height:80vh;border:1px solid var(--line);border-radius:16px;padding:26px;background:var(--paper);color:var(--ink)}dialog::backdrop{background:#0b2829a3}.dialog-heading{display:flex;justify-content:space-between;gap:20px;align-items:center}.dialog-heading h2{font-family:Georgia,serif;font-size:28px;font-weight:400;margin:0}.dialog-note{color:var(--muted);font-size:13px}.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}.review-grid button{border:1px solid #cdd8ca;background:white;color:var(--ink);border-radius:7px;min-height:44px}.review-grid .answered-correct{background:#e1efdb;border-color:#91b89c}.review-grid .answered-wrong{background:#f7e5df;border-color:#c98178}.review-grid .current{outline:2px solid var(--green);outline-offset:2px}.review-key{display:flex;gap:16px;font-size:11px;margin-top:18px;flex-wrap:wrap}.review-key span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:white;border:1px solid #cdd8ca;margin-right:5px}.review-key .key-correct::before{background:#e1efdb}.review-key .key-wrong::before{background:#f7e5df}#summary{border:1px solid #bbd1b0;border-radius:10px;padding:16px;margin-top:20px;background:#edf5e9;font-size:14px}#summary h2{font-size:18px;margin:0 0 4px}#summary p{margin:0 0 12px}[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:16px;z-index:10;background:white;padding:10px}.skip:focus{top:12px}
+    @media(min-width:1500px){main{padding-top:45px;padding-bottom:45px}}@media(max-width:1100px){.layout{grid-template-columns:220px 1fr}.sidebar{padding:30px 22px}main{padding:28px 32px}.hero{align-items:start}.nav-hint{display:none}}@media(max-width:760px){.layout{display:block}.sidebar{padding:16px 22px;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}.sidebar-intro,.sidebar-bottom{display:none}.side-link{font-size:11px;padding:7px 10px}.brand{font-size:14px}.mark{width:30px;height:30px;font-size:20px}main{padding:22px 20px 28px}.topbar{padding-bottom:16px;font-size:11px}.hero{padding:26px 0 22px;flex-wrap:wrap;gap:16px}.hero p{font-size:13px}.hero .text-button{padding:7px 12px}.stats{margin-bottom:22px}.stat{padding:12px}.stat strong{font-size:20px}.stat small{margin-left:3px;font-size:10px}.stat-label{font-size:10px}.card-header{padding:18px 20px 0}.question-body{padding:18px 20px 22px}legend{font-size:19px}.choice{padding:12px;gap:11px;font-size:13px}.card-footer{padding:16px 20px}.below{align-items:start;gap:16px}.below>span{max-width:65%}.pill{padding:4px 9px}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  </style>
 </head>
 <body>
-    <h1>Interactive Multiple Choice Quiz</h1>
-    <div id="quiz-container"></div>
-    <div id="score">Score: 0</div>
-
+  <a class="skip" href="#question-title">Skip to question</a>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Quiz information">
+      <div class="brand"><span class="mark" aria-hidden="true">+</span> Clinical revision</div>
+      <div class="sidebar-intro"><div class="eyebrow">Your study space</div><h2 class="session-label">Small steps.<br>Stronger knowledge.</h2><p>Make time for a little practice.<br>Every question is a chance to learn.</p></div>
+      <div class="side-link"><span class="dot" aria-hidden="true"></span> Practice quiz</div>
+      <div class="sidebar-bottom"><div class="eyebrow">How it works</div><p>Choose an answer for instant feedback. Move at your own pace and revisit any question.</p></div>
+    </aside>
+    <main>
+      <div class="topbar"><span>Study space / Practice</span><span class="pill">At your own pace</span></div>
+      <header class="hero"><div><div class="eyebrow">Pathophysiology &amp; pharmacology</div><h1>A little practice goes a long way.</h1><p>Put your clinical knowledge to the test, one question at a time.</p></div><button class="text-button" id="restart">Restart quiz ↻</button></header>
+      <section class="stats" aria-label="Quiz statistics"><div class="stat"><span class="stat-label">Correct answers</span><strong id="score">0</strong><small id="score-total"></small></div><div class="stat"><span class="stat-label">Questions answered</span><strong id="answered">0</strong><small id="answered-total"></small></div><div class="stat"><span class="stat-label">Accuracy</span><strong id="accuracy">—</strong><small>so far</small></div></section>
+      <div class="progress-heading"><span>Session progress</span><span id="progress-label">0% complete</span></div><progress id="progress" value="0" max="100" aria-label="Questions answered"></progress>
+      <section class="card" aria-label="Current question"><div class="card-header"><span class="question-count" id="question-count"></span><span class="status" id="question-status">Choose one answer</span></div><div class="question-body"><fieldset><legend id="question-title" tabindex="-1"></legend><div class="choices" id="choices"></div></fieldset><div class="feedback" id="feedback" role="status" aria-live="polite" aria-atomic="true"></div></div><div class="card-footer"><button class="text-button" id="previous">← Previous</button><span class="nav-hint">Take your time. You can change your answer.</span><button class="primary" id="next">Next question →</button></div></section>
+      <section id="summary" hidden aria-live="polite"></section>
+      <div class="below"><span>Revision practice · Original question bank</span><button id="review">View all questions ↗</button></div>
+      <noscript><p>Please enable JavaScript to use the interactive quiz.</p></noscript>
+    </main>
+  </div>
+  <dialog id="review-dialog" aria-labelledby="review-title"><div class="dialog-heading"><h2 id="review-title">Your question map</h2><button class="text-button" id="close-review">Close ×</button></div><p class="dialog-note">Jump to any question to answer it or review your choice.</p><div class="review-grid" id="review-grid"></div><div class="review-key"><span>Unanswered</span><span class="key-correct">Correct</span><span class="key-wrong">Incorrect</span></div></dialog>
+  <dialog id="restart-dialog" aria-labelledby="restart-title"><div class="dialog-heading"><h2 id="restart-title">Start a fresh session?</h2></div><p class="dialog-note">This will clear your answers and shuffle the questions.</p><div class="dialog-heading"><button class="text-button" id="cancel-restart">Keep practising</button><button class="primary" id="confirm-restart">Restart quiz</button></div></dialog>
 <script>
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    const quiz = [
+const quiz = [
     {
         question: "What creates a hypertonic environment outside the cells, leading to cellular dehydration?",
         choices: ["a) High glucose concentration", "b) High sodium ion concentration", "c) Low protein levels", "d) Increased bicarbonate levels"],
@@ -1005,74 +994,129 @@
     }
         ];
 
-    shuffle(quiz); // Shuffle the quiz array before rendering
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+let current = 0;
+let userAnswers = new Array(quiz.length).fill(null);
+const byId = id => document.getElementById(id);
+const cleanChoice = choice => choice.replace(/^[a-d]\)\s*/i, '').replace(/\\xa0/g, ' ').trim();
 
-    let score = 0; // Initialize score
-    const userAnswers = new Array(quiz.length).fill(null); // Keep track of user answers
+function updateStats() {
+  const answered = userAnswers.filter(answer => answer !== null).length;
+  const score = quiz.reduce((total, item, index) => total + (userAnswers[index] === item.answer ? 1 : 0), 0);
+  byId('score').textContent = score;
+  byId('answered').textContent = answered;
+  byId('score-total').textContent = byId('answered-total').textContent = `/ ${quiz.length}`;
+  byId('accuracy').textContent = answered ? `${Math.round(score / answered * 100)}%` : '—';
+  byId('progress').max = quiz.length;
+  byId('progress').value = answered;
+  byId('progress-label').textContent = `${Math.round(answered / quiz.length * 100)}% complete`;
+  const summary = byId('summary');
+  summary.hidden = answered !== quiz.length;
+  if (!summary.hidden) {
+    summary.replaceChildren();
+    const heading = document.createElement('h2');
+    heading.textContent = 'Session complete. Nicely done.';
+    const message = document.createElement('p');
+    message.textContent = `You answered ${score} of ${quiz.length} correctly (${Math.round(score / quiz.length * 100)}%). Revisit your answers using the question map, or start a fresh session.`;
+    const review = document.createElement('button');
+    review.className = 'primary';
+    review.textContent = 'Review answers';
+    review.addEventListener('click', openReview);
+    summary.append(heading, message, review);
+  }
+}
 
-    function loadQuiz() {
-        const quizContainer = document.getElementById("quiz-container");
+function updateFeedback() {
+  const item = quiz[current];
+  const answer = userAnswers[current];
+  const correct = answer === item.answer;
+  const feedback = byId('feedback');
+  feedback.className = `feedback${answer !== null && !correct ? ' wrong' : ''}`;
+  feedback.textContent = answer === null ? '' : correct ? '✓ Correct. Well done!' : `Not quite. The correct answer is: ${cleanChoice(item.answer)}`;
+  byId('question-status').textContent = answer === null ? 'Choose one answer' : correct ? 'Answered correctly' : 'Review your answer';
+  byId('choices').querySelectorAll('label').forEach((label, index) => {
+    const choice = item.choices[index];
+    label.className = 'choice';
+    if (choice === answer) label.classList.add('selected', ...(correct ? [] : ['incorrect']));
+    if (answer !== null && choice === item.answer) label.classList.add('correct-answer');
+    label.querySelector('input').checked = choice === answer;
+  });
+  updateStats();
+}
 
-        quiz.forEach((item, index) => {
-            // Create question div
-            const questionDiv = document.createElement("div");
-            questionDiv.classList.add("question");
-            questionDiv.innerHTML = `<p><strong>${index + 1}. ${item.question}</strong></p>`;
+function renderQuestion(focus = false) {
+  const item = quiz[current];
+  byId('question-count').textContent = `Question ${String(current + 1).padStart(2, '0')} / ${quiz.length}`;
+  byId('question-title').textContent = item.question;
+  const choices = byId('choices');
+  choices.replaceChildren();
+  item.choices.forEach((choice, index) => {
+    const label = document.createElement('label');
+    label.className = 'choice';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'current-question';
+    input.value = choice;
+    const letter = document.createElement('span');
+    letter.className = 'letter';
+    letter.textContent = String.fromCharCode(65 + index);
+    letter.setAttribute('aria-hidden', 'true');
+    const text = document.createElement('span');
+    text.textContent = cleanChoice(choice);
+    input.addEventListener('change', () => {
+      userAnswers[current] = choice;
+      updateFeedback();
+    });
+    label.append(input, letter, text);
+    choices.append(label);
+  });
+  byId('previous').disabled = current === 0;
+  byId('next').textContent = current === quiz.length - 1 ? 'Review session →' : 'Next question →';
+  updateFeedback();
+  if (focus) byId('question-title').focus();
+}
 
-            // Create choices div
-            const choicesDiv = document.createElement("div");
-            choicesDiv.classList.add("choices");
+function openReview() {
+  const grid = byId('review-grid');
+  grid.replaceChildren();
+  quiz.forEach((item, index) => {
+    const button = document.createElement('button');
+    const answer = userAnswers[index];
+    const state = answer === null ? 'Unanswered' : answer === item.answer ? 'Correct' : 'Incorrect';
+    button.textContent = index + 1;
+    button.setAttribute('aria-label', `Question ${index + 1}: ${state}`);
+    if (answer !== null) button.classList.add(answer === item.answer ? 'answered-correct' : 'answered-wrong');
+    if (index === current) { button.classList.add('current'); button.setAttribute('aria-current', 'true'); }
+    button.addEventListener('click', () => {
+      current = index;
+      byId('review-dialog').close();
+      renderQuestion(true);
+    });
+    grid.append(button);
+  });
+  byId('review-dialog').showModal();
+}
 
-            item.choices.forEach(choice => {
-                const choiceHTML = `
-                    <label>
-                        <input type="radio" name="question${index}" value="${choice}" onclick="checkAnswer(${index}, '${choice}')">
-                        ${choice}
-                    </label><br>
-                `;
-                choicesDiv.innerHTML += choiceHTML;
-            });
-
-            // Create feedback div
-            const feedbackDiv = document.createElement("div");
-            feedbackDiv.classList.add("feedback");
-            feedbackDiv.id = `feedback${index}`;
-
-            // Append elements
-            questionDiv.appendChild(choicesDiv);
-            questionDiv.appendChild(feedbackDiv);
-            quizContainer.appendChild(questionDiv);
-        });
-    }
-
-    function checkAnswer(index, selectedChoice) {
-        const feedbackDiv = document.getElementById(`feedback${index}`);
-        const scoreDiv = document.getElementById("score");
-
-        // Update the user's answer and adjust the score if necessary
-        if (userAnswers[index] === quiz[index].answer) {
-            // If the previous answer was correct, subtract 1 from the score
-            score--;
-        }
-        if (selectedChoice === quiz[index].answer) {
-            // If the new answer is correct, add 1 to the score
-            score++;
-        }
-        userAnswers[index] = selectedChoice; // Update user's answer
-
-        // Provide feedback
-        if (selectedChoice === quiz[index].answer) {
-            feedbackDiv.innerHTML = `<span class="correct">Correct!</span>`;
-        } else {
-            feedbackDiv.innerHTML = `<span class="wrong">Wrong. The correct answer is ${quiz[index].answer}.</span>`;
-        }
-
-        // Update the score display
-        scoreDiv.innerHTML = `Score: ${score}`;
-    }
-
-    // Load the quiz on page load
-    window.onload = loadQuiz;
+byId('previous').addEventListener('click', () => { if (current > 0) { current--; renderQuestion(true); } });
+byId('next').addEventListener('click', () => { if (current < quiz.length - 1) { current++; renderQuestion(true); } else openReview(); });
+byId('review').addEventListener('click', openReview);
+byId('close-review').addEventListener('click', () => byId('review-dialog').close());
+byId('restart').addEventListener('click', () => byId('restart-dialog').showModal());
+byId('cancel-restart').addEventListener('click', () => byId('restart-dialog').close());
+byId('confirm-restart').addEventListener('click', () => {
+  shuffle(quiz);
+  userAnswers = new Array(quiz.length).fill(null);
+  current = 0;
+  byId('restart-dialog').close();
+  renderQuestion(true);
+});
+shuffle(quiz);
+renderQuestion();
 </script>
 </body>
 </html>
